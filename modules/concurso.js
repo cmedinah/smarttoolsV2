@@ -6,11 +6,6 @@ const db   	        = require('./database'),
       striptags     = require('striptags'),
       maximoPagina  = 5;
 
-let fecha_actual = moment().format(), 
-    fecha_string = moment().format("DD/MM/YYYY"), 
-    hora_string  = moment().format("hh:mm:ss a"), 
-    timestamp    = moment().unix();
-
 //Para saber si un enlace ya existe...
 let existeEnlace = (enlace, token, callback) => 
 {
@@ -84,6 +79,7 @@ let getConcurso = (type, param, callback) =>
             //console.log(sql);
             //console.log(`${timestamp} >= ${data[0].fecha_inicial_timestamp}  && ${timestamp} <= ${data[0].fecha_final_timestamp})`);
             let terminado  = false, 
+                timestamp  = moment().unix(), 
                 enrango    = data.length !== 0 ? 
                               (timestamp >= data[0].fecha_inicial_timestamp  && timestamp <= data[0].fecha_final_timestamp) : 
                               false;
@@ -140,7 +136,12 @@ let crearConcurso = (req, callback) =>
     let data = req.body, 
         token_concurso = data.token_concurso === "" ? "0" : data.token_concurso, 
         editar = token_concurso === "0" ? false : true, 
-        existeArchivo = true;
+        existeArchivo = true, 
+        fecha = {
+                        fecha_actual : moment().format("YYYY-MM-DD HH:MM:SS"), 
+                        fecha_string : moment().format("DD/MM/YYYY"), 
+                        hora_string  : moment().format("hh:mm:ss a")
+                }; 
     //console.log("Valor del token es: " + token_concurso);
     //console.log(req.files);
     //Sabe si existe un archivo...    
@@ -201,9 +202,9 @@ let crearConcurso = (req, callback) =>
                                     fecha_final : moment(fecha_final, "YYYY/MM/DD").format(), 
                                     fecha_final_string : fecha_final,  
                                     fecha_final_timestamp : moment(fecha_final, "YYYY/MM/DD").unix(),
-                                    fecha_creacion : fecha_actual, 
-                                    fecha_creacion_string : fecha_string,
-                                    hora_creacion_string : hora_string
+                                    fecha_creacion : fecha.fecha_actual, 
+                                    fecha_creacion_string : fecha.fecha_string,
+                                    hora_creacion_string : fecha.hora_string
                                 };
                 //Crear los directorios...
                 if(!editar)

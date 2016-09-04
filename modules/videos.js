@@ -194,7 +194,7 @@ let listadoVideos = (req, callback) =>
                                  b.idconcurso = a.idconcurso and 
                                  b.estado = 1 and 
                                  b.estado_video = 3 and 
-                                 b.error_conversion = 0 order by b.fecha_publica desc limit ${numPagina}, ${maximoPagina}`;
+                                 b.error_conversion = 0 order by b.fecha_publica_timestamp desc limit ${numPagina}, ${maximoPagina}`;
     db.queryMysql(sql, (err, data) => 
     {
         if (err) throw err;

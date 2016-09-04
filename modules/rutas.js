@@ -55,7 +55,8 @@ let login = (req, res) =>
 	}
 	else
 	{
-		admin(req, res);
+		console.log("INGRESA PARA IR AL ADMIN");
+		res.redirect('/admin');
 	}
 };
 
