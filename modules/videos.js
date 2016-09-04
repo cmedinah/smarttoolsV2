@@ -4,11 +4,7 @@ const db   	        = require('./database'),
 	  utils			= require('./utils'), 
       moment        = require('moment'),
       striptags     = require('striptags'),
-      maximoPagina  = 5, 
-      fecha_actual  = moment().format("YYYY-MM-DD HH:MM:SS"), 
-      fecha_string  = moment().format("DD/MM/YYYY"), 
-      hora_string   = moment().format("hh:mm:ss a"), 
-      timestamp     = moment().unix();
+      maximoPagina  = 5;
 
 let newVideo = (req, callback) => 
 {
@@ -96,6 +92,12 @@ let newVideo = (req, callback) =>
             }
             else
             {
+                let fechas = {
+                                    fecha_actual : moment().format(), 
+                                    fecha_string : moment().format("DD/MM/YYYY"),
+                                    hora_string  : moment().format("hh:mm:ss a"), 
+                                    timestamp    : moment().unix()
+                             } ;
                 //Guardar el registro...
                 //Actualizar el valor del banner...
                 let sql = `INSERT INTO concursos_videos 
@@ -110,7 +112,7 @@ let newVideo = (req, callback) =>
                                 fecha_publica_string, 
                                 hora_publica, 
                                 fecha_publica_timestamp
-                            ) 
+                            )
                             VALUES (
                                         1, 
                                         '${token_video}',
@@ -124,12 +126,11 @@ let newVideo = (req, callback) =>
                                         '${nombre_usuario}',
                                         '${email}',
                                         '${data.descripcion}',
-                                        '${fecha_actual}',
-                                        '${fecha_string}',
-                                        '${hora_string}',
-                                        '${timestamp}'
+                                        '${fechas.fecha_actual}',
+                                        '${fechas.fecha_string}',
+                                        '${fechas.hora_string}',
+                                        '${fechas.timestamp}'
                                     )`;
-                //console.log(sql);
                 db.queryMysql(sql, (err, response) => 
                 {
                     callback(false, response);
@@ -177,7 +178,6 @@ let totalRegistrosVideosAdmin = (id_admin, callback) =>
     });
 };
 
-
 //LLevar el listado de vídeos...
 let listadoVideos = (req, callback) => 
 {
@@ -186,7 +186,7 @@ let listadoVideos = (req, callback) =>
     let sql = `select a.idconcurso, a.idadministrador, 
                       b.token_video, b.token_archivo, 
                       b.titulo_video, b.nombre_usuario, b.email, 
-                      b.fecha_publica, b.fecha_publica_string, b.hora_publica
+                      b.fecha_publica, b.fecha_publica_string, b.hora_publica, b.duracion_string
                       from concursos a, 
                            concursos_videos b 
                            where a.token_concurso = '${token_concurso}' and 

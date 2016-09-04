@@ -39,7 +39,7 @@
                     <span class="sr-only">Toggle navigation</span>
                     Menu <i class="fa fa-bars"></i>
                 </button>
-                <a class="navbar-brand" href="/">SmartTools</a>
+                <a class="navbar-brand" href="/">SmartTools - {{concurso.nombre_empresa}}</a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
@@ -68,9 +68,11 @@
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                     <div class="site-heading">
-                        <h1>{{concurso.nombre_empresa}}</h1>
+                        <h1>{{concurso.nombre_concurso}}</h1>
                         <hr class="small">
-                        <span class="subheading">{{concurso.nombre_concurso}}</span>
+                        <span class="subheading">
+                            {{concurso.fecha_inicial_string | date('F jS, Y')}} - {{concurso.fecha_final_string | date('F jS, Y')}}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -79,14 +81,16 @@
 
     <!-- Main Content -->
     <div class="container">        
-        <div class="row">
-            <div class="col-lg-12" align = "center">
-                <a href="/{{concurso.url_concurso}}/new" class="btn btn-info">
-                    <span class="glyphicon glyphicon-cloud-upload"></span> Subir Mi vídeo
-                </a>
+        {% if rango.enrango %}
+            <div class="row">
+                <div class="col-lg-12" align = "center">
+                    <a href="/{{concurso.url_concurso}}/new" class="btn btn-info">
+                        <span class="glyphicon glyphicon-cloud-upload"></span> Subir Mi vídeo
+                    </a>
+                </div>
             </div>
-        </div>
-        <hr>
+            <hr>
+        {% endif %}        
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                 {{concurso.descripcion | raw}}
@@ -98,34 +102,8 @@
     <footer>
         <div class="container">
             <div class="row">
-                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                    <ul class="list-inline text-center">
-                        <li>
-                            <a href="#">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fa fa-circle fa-stack-2x"></i>
-                                    <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fa fa-circle fa-stack-2x"></i>
-                                    <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fa fa-circle fa-stack-2x"></i>
-                                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
-                                </span>
-                            </a>
-                        </li>
-                    </ul>
-                    <p class="copyright text-muted">Copyright &copy; Your Website 2016</p>
+                <div class="col-lg-8 col-lg-offset-2 col-md-10">                                        
+                    <p class="copyright text-muted">Copyright &copy; SmartTools 2016</p>
                 </div>
             </div>
         </div>

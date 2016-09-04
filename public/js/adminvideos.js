@@ -78,7 +78,7 @@ $(function()
             var opcTr = opciones.replace("TOKENVIDEO", data[i].idvideo); 
                 
             var urlVideo = "/" + data[i].url_concurso + "/" + data[i].token_video;
-            var txt = "<span style = 'font-size: 1.4em;'><a href = '"+(urlVideo)+"' style = 'color: #2196f3;'>" + data[i].titulo_video + 
+            var txt = "<span style = 'font-size: 1.4em;'><a href = '"+(urlVideo)+"' style = 'color: #2196f3;' target = '_blank'>" + data[i].titulo_video + 
                       "</a></span><br><span style = 'font-size: 0.7em;'>Por: " + 
                       data[i].nombre_usuario + " (<a href = 'mailto:"+(data[i].email)+"' style = 'color: #2196f3;'>"+(data[i].email)+"</a>)<br>" + 
                       "Pertenece al concurso: " + (data[i].nombre_concurso)+ "<br>" + 

@@ -8,7 +8,8 @@ const db   	        = require('./database'),
 
 let fecha_actual = moment().format(), 
     fecha_string = moment().format("DD/MM/YYYY"), 
-    hora_string  = moment().format("hh:mm:ss a");
+    hora_string  = moment().format("hh:mm:ss a"), 
+    timestamp    = moment().unix();
 
 //Para saber si un enlace ya existe...
 let existeEnlace = (enlace, token, callback) => 
@@ -51,10 +52,11 @@ let listarConcursos = (req, callback) =>
     let sql = `select idconcurso, token_concurso, terminado, 
                       publicado, nombre_concurso, url_concurso, 
                       fecha_inicial_string as fecha_inicial, fecha_final_string  as fecha_final, 
-                      fecha_creacion_string as fecha_creacion, hora_creacion_string as hora
+                      fecha_creacion_string, hora_creacion_string as hora
                       from concursos 
                       where idadministrador = '${req.user.idadministrador}' and 
-                            estado = 1 order by fecha_creacion limit ${numPagina}, ${maximoPagina}`; 
+                            estado = 1 order by fecha_creacion desc limit ${numPagina}, ${maximoPagina}`; 
+    //console.log(sql);
     db.queryMysql(sql, (err, data) => 
     {
         if (err) throw err;
@@ -76,8 +78,26 @@ let getConcurso = (type, param, callback) =>
                           b.estado = 1`;
     db.queryMysql(sql, (err, data) => 
     {
-        if (err) throw err;        
-        callback(err, data);
+        if (err) throw err;
+        if(data.length !== 0)
+        {
+            //console.log(sql);
+            //console.log(`${timestamp} >= ${data[0].fecha_inicial_timestamp}  && ${timestamp} <= ${data[0].fecha_final_timestamp})`);
+            let terminado  = false, 
+                enrango    = data.length !== 0 ? 
+                              (timestamp >= data[0].fecha_inicial_timestamp  && timestamp <= data[0].fecha_final_timestamp) : 
+                              false;
+            if(!enrango)
+            {
+                //Preguntar si ya se pasó el tiempo...
+                terminado = timestamp > data[0].fecha_final_timestamp;
+            }
+            callback(false, data, {enrango, terminado});
+        }
+        else
+        {
+            callback(true);
+        }
     });
 };
 
@@ -177,10 +197,10 @@ let crearConcurso = (req, callback) =>
                                     url_concurso : url_concurso,
                                     fecha_inicial : moment(fecha_inicial, "YYYY/MM/DD").format(), 
                                     fecha_inicial_string : fecha_inicial,
-                                    fecha_inicial_timestamp : moment(fecha_inicial, "YYYY/MM/DD").format("x"), 
+                                    fecha_inicial_timestamp : moment(fecha_inicial, "YYYY/MM/DD").unix(), 
                                     fecha_final : moment(fecha_final, "YYYY/MM/DD").format(), 
                                     fecha_final_string : fecha_final,  
-                                    fecha_final_timestamp : moment(fecha_final, "YYYY/MM/DD").format("x"), 
+                                    fecha_final_timestamp : moment(fecha_final, "YYYY/MM/DD").unix(),
                                     fecha_creacion : fecha_actual, 
                                     fecha_creacion_string : fecha_string,
                                     hora_creacion_string : hora_string
@@ -244,7 +264,7 @@ let crearConcurso = (req, callback) =>
 let eliminaConcurso = (token_concurso, callback) => 
 {
     let sql = `UPDATE concursos SET estado = '2' where token_concurso = '${token_concurso}'`;
-    console.log(sql);
+    //console.log(sql);
     db.queryMysql(sql, (err, response) => 
     {
         callback(err, response);

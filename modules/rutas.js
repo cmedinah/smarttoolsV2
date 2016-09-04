@@ -9,8 +9,7 @@ const db   			= 	require('./database'),
 let index = (req, res) => 
 {
 	res.render("index", {
-		titulo 	:  	"Prueba de conexión",
-		usuario	:	"Test de prueba"
+		titulo 	:  	"SmartTools"
 	});
 };
 
@@ -22,7 +21,7 @@ let admin = (req, res) =>
     }
     else
     {
-		//console.log(req.user);
+		//console.log(req.user.identificacion);
         //var user = req.user;
 		res.render("admin", { 
 			data	:  req.user
@@ -48,9 +47,16 @@ let adminvideos = (req, res) =>
 
 let login = (req, res) => 
 {
-	res.render("login", {
-		titulo 	:  	"SmartTools"
-	});
+	if(!req.isAuthenticated())
+	{
+		res.render("login", {
+			titulo 	:  	"SmartTools"
+		});
+	}
+	else
+	{
+		admin(req, res);
+	}
 };
 
 let register = (req, res) => 
@@ -81,7 +87,7 @@ let registerPost = (req, res, next) =>
 				fecha 		= `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`, 
 				sql 		= `INSERT INTO administrador_empresa (estado, identificacion, nombres, apellidos, email, password, nombre_empresa, fecha) 
 							   VALUES ('1', '${data.identificacion}', '${data.nombres}', '${data.apellidos}', '${data.email}', '${password}', '${data.empresa}', '${fecha}')`;
-			console.log(sql);
+			//console.log(sql);
 			db.queryMysql(sql, (err, response) => 
 			{
 				if (err || response.affectedRows === 0)
@@ -111,17 +117,17 @@ let loginPost = (req, res, next) =>
 	{
 		if(err)
 		{
-			return res.render('login', {titulo: 'UNO', error: err.message});
+			return res.render('login', {titulo: 'SmartTools', error: err.message});
 		}
 		if(!user)
 		{
-			return res.render('login', {titulo: 'DOS', error: info.message, usuario : info.usuario});
+			return res.render('login', {titulo: 'SmartTools', error: info.message, usuario : info.usuario});
 		}
 		return req.logIn(user, (err) => 
 		{
 			if(err)
 			{
-				return res.render('login', {titulo: 'TRES', error: err.message});
+				return res.render('login', {titulo: 'SmartTools', error: err.message});
 			}
 			else
 			{
@@ -144,15 +150,12 @@ let newConcurso = (req, res) =>
 		if(req.params.id !== "0")
 		{
 			//console.log("INGRESA A ESTE PUNTO");
-			concurso.getConcurso(1, req.params.id, (err, concurso) =>
+			concurso.getConcurso(1, req.params.id, (err, concurso, rango) =>
 			{
-				console.log(concurso.length);
-				if(concurso.length === 1)
+				//console.log(concurso.length);
+				if(!err)
 				{
-					res.render("newconcurso", { 
-						data		: req.user, 
-						concurso	: concurso[0]
-					});
+					res.render("newconcurso", {data	: req.user, concurso : concurso[0], rango : rango});
 				}
 				else
 				{
@@ -162,7 +165,7 @@ let newConcurso = (req, res) =>
 		}
 		else
 		{
-			console.log("INGRESA A ESTE SEGUNDO PUNTO");
+			//console.log("INGRESA A ESTE SEGUNDO PUNTO");
 			res.render("newconcurso", { 
 				data		:  req.user, 
 				concurso	: {}
@@ -182,7 +185,7 @@ let newConcursoPost = (req, res) =>
     {
 		concurso.crearConcurso(req, (err, data) => 
 		{
-			console.log("Guarda");
+			//console.log("Guarda");
 			res.json({err, data});
 			//res.redirect('/admin');
 			/*
@@ -241,7 +244,7 @@ let listarConcursos = (req, res) =>
 let eliminaConcurso  = (req, res) => 
 {
 	if(!req.isAuthenticated())
-    {        
+    {
         res.json({error: true, data : "No está autenticado"});
     }
 	else
@@ -258,7 +261,7 @@ let eliminarvideo  = (req, res) =>
 	
 	if(!req.isAuthenticated())
     {        
-        res.json({error: true, data : "No está autenticado"});
+        res.json({error: true, data : "No est√° autenticado"});
     }
 	else
 	{
@@ -273,20 +276,13 @@ let eliminarvideo  = (req, res) =>
 let showConcurso = (req, res) => 
 {
 	//console.log(req.params.new);
-	concurso.getConcurso(2, req.params.url, (err, concurso) =>
+	concurso.getConcurso(2, req.params.url, (err, concurso, rango) =>
 	{
-		if(concurso)
+		if(!err)
 		{
-			if(concurso.length === 1)
-			{
-				res.render("concurso", {  
-					concurso	: concurso[0]
-				});
-			}
-			else
-			{
-				notFound404(req, res);
-			}
+			//console.log("PARA SABER SI ESTÁ EN EL RANGO", rango);			
+			//console.log({concurso : concurso[0], rango});
+			res.render("concurso", {concurso : concurso[0], rango : rango});			
 		}
 		else
 		{
@@ -307,17 +303,15 @@ let vistaConcursoVideo = (req, res) =>
 	{
 		template = "video";
 	}
-	console.log(req.params.accion);
+	//console.log(req.params.accion);
 	//res.render("newvideo");
-	concurso.getConcurso(2, req.params.url, (err, concurso) =>
+	concurso.getConcurso(2, req.params.url, (err, concurso, rango) =>
 	{
-		if(concurso)
+		if(!err)
 		{
 			if(template !== "video")
 			{
-				res.render(template, {  
-					concurso	: concurso[0]
-				});
+				res.render(template, {concurso : concurso[0], rango : rango});
 			}
 			else
 			{
@@ -326,9 +320,7 @@ let vistaConcursoVideo = (req, res) =>
 				{
 					if(video)
 					{
-						res.render(template, {  
-							concurso	: concurso[0], video
-						});
+						res.render(template, {concurso : concurso[0], video, rango : rango});
 					}
 					else
 					{
@@ -348,7 +340,7 @@ let newVideoPost = (req, res) =>
 {
 	videos.newVideo(req, (error, data) => 
 	{
-		console.log("Guarda el vídeo...");
+		//console.log("Guarda el vídeo...");
 		res.json({error, data});
 		//res.redirect(`/${req.body.url}`);
 		/*
@@ -370,17 +362,15 @@ let numeroVideos = (req, res) =>
 	});
 };
 
-
 let numeroVideosAdmin = (req, res) => 
 {
-	//console.log("LLega a este punto DE LA PETECIÓN...");
+	//console.log("LLega a este punto DE LA PETECI√ìN...");
 	videos.totalRegistrosVideosAdmin(req.params.idAdmin, (err, data) => 
 	{
 
 		res.json(data);
 	});
 };
-
 
 let listadoVideos = (req, res) => 
 {

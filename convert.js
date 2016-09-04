@@ -15,7 +15,7 @@ let sql = `select a.idvideo, a.idadministrador, a.token_archivo, a.extension
                       b.idconcurso = a.idconcurso and 
                       b.estado = 1 and 
                       c.idadministrador = b.idadministrador and  
-                      c.estado = 1 order by a.fecha_publica limit 0, 3`;
+                      c.estado = 1 order by a.fecha_publica limit 0, 10`;
 db.queryMysql(sql, (err, data) => 
 {
     if(data.length !== 0)

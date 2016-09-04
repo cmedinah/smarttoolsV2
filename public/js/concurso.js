@@ -1,15 +1,30 @@
 $(function()
 {
-    console.log("Carga");
+    //console.log("Carga");
     var numeroPagina    = 0,  
         totalPagina     = 0, 
         privado         = new factoria(), 
         token_concurso  = privado.getData("token_concurso"),  
         url_concurso    = privado.getData("url_concurso"),
+        en_rango        = privado.getData("rango"),
+        terminado       = privado.getData("terminado"),
+        fecha_inicial     = privado.getData("fecha_inicial"),
         nomServicios    = {
                                 numvideos : {metodo : "GET"},
                                 getvideos : {metodo : "GET"}
                           };
+    if(!en_rango && !terminado)
+    {
+        $('#countdown').countdown(
+        {
+            date: fecha_inicial,
+            format: 'on'
+        },
+        function()
+        {
+            location.reload();
+        });
+    }
     var consumeServicios = function(opciones, callback)
 	{
         //debugger;
@@ -100,8 +115,8 @@ $(function()
             var txt = "<span style = 'font-size: 1.4em;'><a href = '"+(urlVideo)+"' style = 'color: #2196f3;'>" + data[i].titulo_video + 
                       "</a></span><br><span style = 'font-size: 0.7em;'>Por: " + 
                       data[i].nombre_usuario + " (<a href = 'mailto:"+(data[i].email)+"' style = 'color: #2196f3;'>"+(data[i].email)+"</a>)<br>" + 
-                      "Agregado el día: " + (data[i].fecha_publica_string)+" - "+(data[i].hora_publica) + 
-                      "</span>";
+                      "Agregado el día: " + (data[i].fecha_publica_string)+" - "+(data[i].hora_publica) + "<br>" + 
+                      "Duración: " + (data[i].duracion_string) + "</span>";
             //<img src="cinqueterre.jpg" class="img-thumbnail" alt="Cinque Terre" width="304" height="236">
             table += "<tr><td width = '20%'><center>" + 
                      "<a href = '"+(urlVideo)+"'><img src = '/static/"+(data[i].idadministrador)+"/videos/thumbnail/"+(data[i].token_archivo)+".png' class = 'img-thumbnail' width = '100' height = '100' border = '0'></a>" + 
@@ -247,56 +262,59 @@ $(function()
     var numeroConcursos = (function numeroConcursos()
     {
         numeroPagina = 0;
-        consumeServicios({servicio : "numvideos", data : 1}, function(data)
+        if(en_rango || terminado)
         {
-            console.log(data);
-            totalPagina = data.numPagina;
-            if(data.numPagina !== 0)
+            consumeServicios({servicio : "numvideos", data : 1}, function(data)
             {
-                $("#paginar").html("<nav aria-label = 'Page navigation'><ul class = 'pagination'></ul></nav>");
-                var valor = ""; 
-                for(var i = 0; i <= data.numPagina + 1; i++)
+                console.log(data);
+                totalPagina = data.numPagina;
+                if(data.numPagina !== 0)
                 {
-                    if(i === 0 || i === data.numPagina + 1)
+                    $("#paginar").html("<nav aria-label = 'Page navigation'><ul class = 'pagination'></ul></nav>");
+                    var valor = ""; 
+                    for(var i = 0; i <= data.numPagina + 1; i++)
                     {
-                        valor = "<li class = '"+(i === 0 ? "disabled" : "")+"'>" + 
-                                "<a href = 'javascript:;' aria-label = '"+(i === 0 ? "Previous" : "Next")+"'>" + 
-                                "<span aria-hidden = 'true'>"+(i === 0 ? "&laquo;" : "&raquo;")+" </span>" + 
-                                "</a>" + 
-                                "</li>";
-                    }
-                    else
-                    {
-                        valor = "<li class = '"+(i === 1 ? "active" : "")+"'><a href = 'javascript:;'>"+(i)+"</a></li>";   
-                    }
-                    $(".pagination").append(valor);
-                    $(".pagination > li > a:eq("+i+")").click(function(e)
-                    {
-                        if(!$(this).attr("aria-label"))
+                        if(i === 0 || i === data.numPagina + 1)
                         {
-                            if(!$(this).parent().hasClass("active"))
-                            {
-                                listadoDeConcursos(Number($(this).text()));
-                            }
+                            valor = "<li class = '"+(i === 0 ? "disabled" : "")+"'>" + 
+                                    "<a href = 'javascript:;' aria-label = '"+(i === 0 ? "Previous" : "Next")+"'>" + 
+                                    "<span aria-hidden = 'true'>"+(i === 0 ? "&laquo;" : "&raquo;")+" </span>" + 
+                                    "</a>" + 
+                                    "</li>";
                         }
                         else
                         {
-                            if(!$(this).parent().hasClass("disabled"))
-                            {
-                                listadoDeConcursos(numeroPagina + ($(this).attr("aria-label") === "Previous" ? -1 : 1));
-                            }
+                            valor = "<li class = '"+(i === 1 ? "active" : "")+"'><a href = 'javascript:;'>"+(i)+"</a></li>";   
                         }
-                    });
+                        $(".pagination").append(valor);
+                        $(".pagination > li > a:eq("+i+")").click(function(e)
+                        {
+                            if(!$(this).attr("aria-label"))
+                            {
+                                if(!$(this).parent().hasClass("active"))
+                                {
+                                    listadoDeConcursos(Number($(this).text()));
+                                }
+                            }
+                            else
+                            {
+                                if(!$(this).parent().hasClass("disabled"))
+                                {
+                                    listadoDeConcursos(numeroPagina + ($(this).attr("aria-label") === "Previous" ? -1 : 1));
+                                }
+                            }
+                        });
+                    }
+                    //Traer los primeros concursos...
+                    listadoDeConcursos(1);
                 }
-                //Traer los primeros concursos...
-                listadoDeConcursos(1);
-            }
-            else
-            {
-                $("#videos").html("<center><h3>No hay vídeos cargados en el momento</h3></center>");
-                $("#paginar").html("");
-            }         
-        });
+                else
+                {
+                    $("#videos").html("<center><h3>No hay vídeos cargados en el momento</h3></center>");
+                    $("#paginar").html("");
+                }         
+            });
+        }
         return numeroConcursos;
     })();
 });

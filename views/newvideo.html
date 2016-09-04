@@ -50,7 +50,7 @@
                     <span class="sr-only">Toggle navigation</span>
                     Menu <i class="fa fa-bars"></i>
                 </button>
-                <a class="navbar-brand" href="/">SmartTools</a>
+                <a class="navbar-brand" href="/">SmartTools - {{concurso.nombre_empresa}}</a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
@@ -79,22 +79,23 @@
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                     <div class="site-heading">
-                        <h1>{{concurso.nombre_empresa}}</h1>
+                        <h1>{{concurso.nombre_concurso}}</h1>
                         <hr class="small">
-                        <span class="subheading">{{concurso.nombre_concurso}}</span>
+                        <span class="subheading">
+                            {{concurso.fecha_inicial_string | date('F jS, Y')}} - {{concurso.fecha_final_string | date('F jS, Y')}}
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
     </header>
-
     <!-- Main Content -->
     <div class="container">
         
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                 <!-- style="display:none;" //-->
-                <div id = "progreso" style="display:none;>
+                <div id = "progreso" style="display:none;">
                     <h2 id = "tituloSube"></h2>
                     <div class = "progress">
                         <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0%" id = "progress">
@@ -115,42 +116,50 @@
                     </div>
                 </div>
                 <!-- Inicio //-->
-                <form ref = 'uploadForm' id = 'uploadForm' action = '/newvideo' method='post' encType = "multipart/form-data" role="form">
-                    <div class="form-group">
-                        <label>Título del vídeo</label>
-                        <input class="form-control" placeholder = "Título del vídeo" name = "titulo_video" id = "titulo_video" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Digita tú nombre</label>
-                        <input class="form-control" placeholder="Nombres y Apellidos"  name = "nombre_usuario" id = "nombre_usuario" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Digita tú E-mail</label>
-                        <input type = "email" class="form-control" placeholder="Correo Electrónico"  name = "email" id = "email" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Descripción del vídeo</label>
-                        <textarea class="summernote" name = "descripcion" id = "descripcion"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <!-- <label>Subir vídeo</label> //-->
-                        <div align = "center">
-                            <!-- AVI,WMV, FLV, MP4 //-->
-                            <a href="javascript:;" class="btn btn-danger" style="padding:13px; width: 50%;" id = "upvideo">
-                                    <span class="glyphicon glyphicon-cloud-upload"></span> Subir Mi vídeo
-                            </a>
-                            <!-- <input type="file" name="sampleFile" style="display:none;"/> //-->
-                            <input type="file" name="sampleFile" style="display: none" id = "upload" accept=".avi, .wmv, .flv, .mov, .mp4, .webm, .ogg|video/*"/>
-                            <h3 id = "nombreVideo">Selecciona el vídeo</h3>
+                {% if rango.enrango %}                
+                    <form ref = 'uploadForm' id = 'uploadForm' action = '/newvideo' method='post' encType = "multipart/form-data" role="form">
+                        <div class="form-group">
+                            <label>Título del vídeo</label>
+                            <input class="form-control" placeholder = "Título del vídeo" name = "titulo_video" id = "titulo_video" required>
                         </div>
-                    </div>
-                    <hr>
-                    <div class="form-group">
-                        <input type = "hidden" name = "idadministrador" value = "{{concurso.idadministrador}}">
-                        <input type = "hidden" name = "idconcurso" value = "{{concurso.idconcurso}}">
-                        <button type="submit" class="btn btn-lg btn-success btn-block" style="padding:13px;">Guardar</button>
-                    </div>
-                </form>	
+                        <div class="form-group">
+                            <label>Digita tú nombre</label>
+                            <input class="form-control" placeholder="Nombres y Apellidos"  name = "nombre_usuario" id = "nombre_usuario" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Digita tú E-mail</label>
+                            <input type = "email" class="form-control" placeholder="Correo Electrónico"  name = "email" id = "email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción del vídeo</label>
+                            <textarea class="summernote" name = "descripcion" id = "descripcion"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <!-- <label>Subir vídeo</label> //-->
+                            <div align = "center">
+                                <!-- AVI,WMV, FLV, MP4 //-->
+                                <a href="javascript:;" class="btn btn-danger" style="padding:13px; width: 50%;" id = "upvideo">
+                                        <span class="glyphicon glyphicon-cloud-upload"></span> Subir Mi vídeo
+                                </a>
+                                <!-- <input type="file" name="sampleFile" style="display:none;"/> //-->
+                                <input type="file" name="sampleFile" style="display: none" id = "upload" accept=".avi, .wmv, .flv, .mov, .mp4, .webm, .ogg|video/*"/>
+                                <h3 id = "nombreVideo">Selecciona el vídeo</h3>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group">
+                            <input type = "hidden" name = "idadministrador" value = "{{concurso.idadministrador}}">
+                            <input type = "hidden" name = "idconcurso" value = "{{concurso.idconcurso}}">
+                            <button type="submit" class="btn btn-lg btn-success btn-block" style="padding:13px;">Guardar</button>
+                        </div>
+                    </form>	
+                {% else %}
+                    <center>
+                    <h2>No es Posible subir un vídeo, el concurso no ha iniciado</h2>
+                    <p>{{concurso.fecha_inicial_string | date('F jS, Y')}} - {{concurso.fecha_final_string | date('F jS, Y')}}</p>
+                    </center>
+                {% endif %}
+
                 <!-- Fin //-->
             </div>
         </div>
@@ -160,34 +169,8 @@
     <footer>
         <div class="container">
             <div class="row">
-                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                    <ul class="list-inline text-center">
-                        <li>
-                            <a href="#">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fa fa-circle fa-stack-2x"></i>
-                                    <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fa fa-circle fa-stack-2x"></i>
-                                    <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fa fa-circle fa-stack-2x"></i>
-                                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
-                                </span>
-                            </a>
-                        </li>
-                    </ul>
-                    <p class="copyright text-muted">Copyright &copy; Your Website 2016</p>
+                <div class="col-lg-8 col-lg-offset-2 col-md-10">                                        
+                    <p class="copyright text-muted">Copyright &copy; SmartTools 2016</p>
                 </div>
             </div>
         </div>
@@ -208,7 +191,5 @@
     <script src = "../vendor/summernote/summernote.min.js"></script>
     <script src = "../vendor/sweetalert/sweetalert.min.js"></script>
     <script src = "../js/newvideo.js"></script>
-
 </body>
-
 </html>

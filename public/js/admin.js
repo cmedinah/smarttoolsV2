@@ -75,7 +75,7 @@ $(function()
             var opcTr = opciones.replace("TOKENCONCURSO", data[i].token_concurso), 
                 opcTr = opcTr.replace("URL_EDITAR", "/newconcurso/" + data[i].token_concurso);
                 txtCurso = "<h5><a href = '/"+(data[i].url_concurso)+"' target = '_blank'>"+(data[i].nombre_concurso)+"</a></h5>" + 
-                           "<p class = 'small'>"+(data[i].fecha_creacion)+" - "+(data[i].hora)+"</p>";
+                           "<p class = 'small'>"+(data[i].fecha_creacion_string)+" - "+(data[i].hora)+"</p>";
             var tr = "<tr>" + 
                      "<td>"+(txtCurso)+"</td>" + 
                      "<td>"+(data[i].fecha_inicial)+"</td>" +
