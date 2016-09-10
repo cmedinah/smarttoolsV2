@@ -8,46 +8,49 @@ const nodemailer	= require('nodemailer'),
 	  transporter 	= nodemailer.createTransport(cadenaSMTP),
 	  db         	= require('./modules/database'), 
 	  procesados    = [];
-	  db.conectaDatabase();
 
-//Traer los emails que se enviarán...
-let sql = `select a.idvideo, a.token_video, a.idconcurso, a.error_conversion, 
-				  a.duracion_string, a.titulo_video, a.nombre_usuario, a.email, 
-				  a.fecha_publica_string, a.hora_publica, 
-				  b.nombre_concurso, b.url_concurso
-				  from concursos_videos a, 
-				 	   concursos b
-				  where a.estado_video = 3 and 
-				 		a.email_enviado = 0 and 
-				 		a.estado = 1 and 
-				 		a.error_conversion = 0 and 
-				 		b.idconcurso = a.idconcurso and 
-				 		b.estado = 1 order by a.fecha_publica limit 0, 20`;
-db.queryMysql(sql, (err, data) => 
+let sendEmail = () => 
 {
-	if(data.length !== 0)
+	db.conectaDatabase();
+	//Traer los emails que se enviarán...
+	let sql = `select a.idvideo, a.token_video, a.idconcurso, a.error_conversion, 
+					a.duracion_string, a.titulo_video, a.nombre_usuario, a.email, 
+					a.fecha_publica_string, a.hora_publica, 
+					b.nombre_concurso, b.url_concurso
+					from concursos_videos a, 
+						concursos b
+					where a.estado_video = 3 and 
+							a.email_enviado = 0 and 
+							a.estado = 1 and 
+							a.error_conversion = 0 and 
+							b.idconcurso = a.idconcurso and 
+							b.estado = 1 order by a.fecha_publica limit 0, 20`;
+	db.queryMysql(sql, (err, data) => 
 	{
-		console.log(`E-mail 0 de ${data.length}`);
-		for(let i = 0; i < data.length; i++)
+		if(data.length !== 0)
 		{
-			procesados.push({
-                                idvideo : data[i].idvideo, 
-                                terminado : false
-                            });
-			enviarEmail(data[i], (err, video) => 
+			console.log(`E-mail 0 de ${data.length}`);
+			for(let i = 0; i < data.length; i++)
 			{
-				actualizaEstadoEnvio(video, (err, video) => 
+				procesados.push({
+									idvideo : data[i].idvideo, 
+									terminado : false
+								});
+				enviarEmail(data[i], (err, video) => 
 				{
-					terminaDeProcesarEmail(video.idvideo);
-				});				
-			});
+					actualizaEstadoEnvio(video, (err, video) => 
+					{
+						terminaDeProcesarEmail(video.idvideo);
+					});				
+				});
+			}
+		}	
+		else
+		{
+			db.closeConection();
 		}
-	}	
-	else
-	{
-		db.closeConection();
-	}
-});
+	});
+};
 
 //Para cambiar el estado a terminado...
 let terminaDeProcesarEmail = (idvideo) => 
@@ -180,3 +183,6 @@ let enviarEmail = (datosEmail, callback) =>
     	callback(error, datosEmail);
 	});
 };
+
+//sendEmail();
+module.exports.sendEmail = sendEmail;

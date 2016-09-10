@@ -4,80 +4,84 @@ const db            = require('./modules/database'),
       ffmpeg        = require('fluent-ffmpeg'), 
       moment        = require('moment'), 
       procesados    = [];
-      db.conectaDatabase();
-console.time('test');
-let sql = `select a.idvideo, a.idadministrador, a.token_archivo, a.extension 
-           from concursos_videos a, 
-                concursos b, 
-                administrador_empresa c
-                where a.estado_video = 1 and 
-                      a.estado = 1 and 
-                      b.idconcurso = a.idconcurso and 
-                      b.estado = 1 and 
-                      c.idadministrador = b.idadministrador and  
-                      c.estado = 1 order by a.fecha_publica limit 0, 10`;
-db.queryMysql(sql, (err, data) => 
+
+let processConvertVideo = () => 
 {
-    if(data.length !== 0)
+    db.conectaDatabase();
+    console.time('test');
+    let sql = `select a.idvideo, a.idadministrador, a.token_archivo, a.extension 
+            from concursos_videos a, 
+                    concursos b, 
+                    administrador_empresa c
+                    where a.estado_video = 1 and 
+                        a.estado = 1 and 
+                        b.idconcurso = a.idconcurso and 
+                        b.estado = 1 and 
+                        c.idadministrador = b.idadministrador and  
+                        c.estado = 1 order by a.fecha_publica limit 0, 5`;
+    db.queryMysql(sql, (err, data) => 
     {
-        console.log(`Video 0 de ${data.length}`);
-        for(let i = 0; i < data.length; i++)
+        if(data.length !== 0)
         {
-            procesados.push({
-                                token : data[i].token_archivo, 
-                                terminado : false
-            });
-            //Verificar si el archivo existe...
-            let baseUbicaVideo = `${__dirname}/uploadedfiles/${data[i].idadministrador}/videos`, 
-                videoOriginal  = `${baseUbicaVideo}/org/${data[i].token_archivo}.${data[i].extension}`;
-            fs.exists(videoOriginal, function(exists)
+            console.log(`Video 0 de ${data.length}`);
+            for(let i = 0; i < data.length; i++)
             {
-                if(exists)
+                procesados.push({
+                                    token : data[i].token_archivo, 
+                                    terminado : false
+                });
+                //Verificar si el archivo existe...
+                let baseUbicaVideo = `${__dirname}/uploadedfiles/${data[i].idadministrador}/videos`, 
+                    videoOriginal  = `${baseUbicaVideo}/org/${data[i].token_archivo}.${data[i].extension}`;
+                fs.exists(videoOriginal, function(exists)
                 {
-                    actualizaEstadoVideo
-                                            ({
+                    if(exists)
+                    {
+                        actualizaEstadoVideo
+                                                ({
+                                                    video           : data[i], 
+                                                    estado          : 2, 
+                                                    errorConvierte  : 0
+                                                },
+                                                (err, video) => 
+                                                {
+                                                    convierteVideo(video, (err, video, duration) => 
+                                                    {
+                                                        actualizaEstadoVideo
+                                                        ({
+                                                            video           : video, 
+                                                            estado          : 3, 
+                                                            errorConvierte  : err ? 1 : 0, 
+                                                            duration        : duration
+                                                        },
+                                                        (err, video) => 
+                                                        {
+                                                            terminaDeProcesarVideos(video.token_archivo);
+                                                        });
+                                                    });
+                                                });
+                    }
+                    else
+                    {
+                        actualizaEstadoVideo({
                                                 video           : data[i], 
-                                                estado          : 2, 
-                                                errorConvierte  : 0
+                                                estado          : 3, 
+                                                errorConvierte  : 1
                                             },
                                             (err, video) => 
                                             {
-                                                convierteVideo(video, (err, video, duration) => 
-                                                {
-                                                    actualizaEstadoVideo
-                                                    ({
-                                                        video           : video, 
-                                                        estado          : 3, 
-                                                        errorConvierte  : err ? 1 : 0, 
-                                                        duration        : duration
-                                                    },
-                                                    (err, video) => 
-                                                    {
-                                                        terminaDeProcesarVideos(video.token_archivo);
-                                                    });
-                                                });
+                                                terminaDeProcesarVideos(video.token_archivo);
                                             });
-                }
-                else
-                {
-                    actualizaEstadoVideo({
-                                            video           : data[i], 
-                                            estado          : 3, 
-                                            errorConvierte  : 1
-                                        },
-                                        (err, video) => 
-                                        {
-                                            terminaDeProcesarVideos(video.token_archivo);
-                                        });
-                }
-            });
+                    }
+                });
+            }
         }
-    }
-    else
-    {
-        db.closeConection();
-    }
-});
+        else
+        {
+            db.closeConection();
+        }
+    });
+};
 
 let terminaDeProcesarVideos = (token_archivo) => 
 {
@@ -182,3 +186,5 @@ let convierteVideo = (datosVideo, callback) =>
                             duration = data.duration;
                         });
 };
+//processConvertVideo();
+module.exports.processConvertVideo = processConvertVideo;
