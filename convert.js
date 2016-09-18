@@ -161,7 +161,7 @@ let actualizaEstadoVideo = (opc, callback) =>
 
 let convierteVideo = (datosVideo, callback) => 
 {
-    let baseUbicaVideo = `/home/ec2-user/efs/uploadedfiles/uploadedfiles/${datosVideo.idadministrador}/videos`, 
+    let baseUbicaVideo = `/home/ec2-user/efs/uploadedfiles/${datosVideo.idadministrador}/videos`, 
         videoOriginal  = `${baseUbicaVideo}/org/${datosVideo.token_archivo}.${datosVideo.extension}`, 
         duration       = 0;
 
