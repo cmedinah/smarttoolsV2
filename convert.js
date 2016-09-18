@@ -31,7 +31,7 @@ let processConvertVideo = () =>
                                     terminado : false
                 });
                 //Verificar si el archivo existe...
-                let baseUbicaVideo = `${__dirname}/uploadedfiles/${data[i].idadministrador}/videos`, 
+                let baseUbicaVideo = `/home/ec2-user/efs/uploadedfiles/${data[i].idadministrador}/videos`, 
                     videoOriginal  = `${baseUbicaVideo}/org/${data[i].token_archivo}.${data[i].extension}`;
                 fs.exists(videoOriginal, function(exists)
                 {
@@ -161,7 +161,7 @@ let actualizaEstadoVideo = (opc, callback) =>
 
 let convierteVideo = (datosVideo, callback) => 
 {
-    let baseUbicaVideo = `${__dirname}/uploadedfiles/${datosVideo.idadministrador}/videos`, 
+    let baseUbicaVideo = `/home/ec2-user/efs/uploadedfiles/uploadedfiles/${datosVideo.idadministrador}/videos`, 
         videoOriginal  = `${baseUbicaVideo}/org/${datosVideo.token_archivo}.${datosVideo.extension}`, 
         duration       = 0;
 
