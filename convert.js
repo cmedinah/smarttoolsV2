@@ -18,7 +18,7 @@ let processConvertVideo = () =>
                         b.idconcurso = a.idconcurso and 
                         b.estado = 1 and 
                         c.idadministrador = b.idadministrador and  
-                        c.estado = 1 order by a.fecha_publica limit 0, 5`;
+                        c.estado = 1 order by a.fecha_publica limit 0, 1`;
     db.queryMysql(sql, (err, data) => 
     {
         if(data.length !== 0)
@@ -165,7 +165,8 @@ let convierteVideo = (datosVideo, callback) =>
         videoOriginal  = `${baseUbicaVideo}/org/${datosVideo.token_archivo}.${datosVideo.extension}`, 
         duration       = 0;
 
-    let command = ffmpeg(videoOriginal)
+    let command = new ffmpeg({ source: videoOriginal, nolog: true })
+                  .setFfmpegPath("/usr/local/bin/ffmpeg/ffmpeg")
                   .screenshots({
                                     filename: `${datosVideo.token_archivo}.png`,
                                     count: 1,
@@ -186,5 +187,5 @@ let convierteVideo = (datosVideo, callback) =>
                             duration = data.duration;
                         });
 };
-//processConvertVideo();
-module.exports.processConvertVideo = processConvertVideo;
+processConvertVideo();
+//module.exports.processConvertVideo = processConvertVideo;

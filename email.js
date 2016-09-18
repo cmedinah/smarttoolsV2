@@ -1,55 +1,56 @@
 "use strict";
 const nodemailer	= require('nodemailer'), 
-	  urlencode  	= require('urlencode'),
+      ses           = require('nodemailer-ses-transport'), 
 	  moment        = require('moment'), 
-	  fs 		 	= require('fs'),
-	  config 	 	= JSON.parse(fs.readFileSync('config.json', 'utf8')), 
-	  cadenaSMTP 	= `smtps://${urlencode(config.mail.user)}:${config.mail.password}@smtp.gmail.com`, 
-	  transporter 	= nodemailer.createTransport(cadenaSMTP),
+      fs            = require('fs'),
+      config        = JSON.parse(fs.readFileSync('config.json', 'utf8')), 
 	  db         	= require('./modules/database'), 
-	  procesados    = [];
-
+	  procesados    = [], 
+      transporter   = nodemailer.createTransport(ses({
+                            accessKeyId: 'ACCES_KEY',
+                            secretAccessKey: 'SECRET_KEY_ACCES'
+                      }));
 let sendEmail = () => 
 {
-	db.conectaDatabase();
-	//Traer los emails que se enviarán...
-	let sql = `select a.idvideo, a.token_video, a.idconcurso, a.error_conversion, 
-					a.duracion_string, a.titulo_video, a.nombre_usuario, a.email, 
-					a.fecha_publica_string, a.hora_publica, 
-					b.nombre_concurso, b.url_concurso
-					from concursos_videos a, 
-						concursos b
-					where a.estado_video = 3 and 
-							a.email_enviado = 0 and 
-							a.estado = 1 and 
-							a.error_conversion = 0 and 
-							b.idconcurso = a.idconcurso and 
-							b.estado = 1 order by a.fecha_publica limit 0, 20`;
-	db.queryMysql(sql, (err, data) => 
-	{
-		if(data.length !== 0)
-		{
-			console.log(`E-mail 0 de ${data.length}`);
-			for(let i = 0; i < data.length; i++)
-			{
-				procesados.push({
-									idvideo : data[i].idvideo, 
-									terminado : false
-								});
-				enviarEmail(data[i], (err, video) => 
-				{
-					actualizaEstadoEnvio(video, (err, video) => 
-					{
-						terminaDeProcesarEmail(video.idvideo);
-					});				
-				});
-			}
-		}	
-		else
-		{
-			db.closeConection();
-		}
-	});
+    db.conectaDatabase();
+    //Traer los emails que se enviarán...
+    let sql = `select a.idvideo, a.token_video, a.idconcurso, a.error_conversion, 
+    				  a.duracion_string, a.titulo_video, a.nombre_usuario, a.email, 
+    				  a.fecha_publica_string, a.hora_publica, 
+    				  b.nombre_concurso, b.url_concurso
+    				  from concursos_videos a, 
+    				 	   concursos b
+    				  where a.estado_video = 3 and 
+    				 		a.email_enviado = 0 and 
+    				 		a.estado = 1 and 
+    				 		a.error_conversion = 0 and 
+    				 		b.idconcurso = a.idconcurso and 
+    				 		b.estado = 1 order by a.fecha_publica limit 0, 1`;
+    db.queryMysql(sql, (err, data) => 
+    {
+    	if(data.length !== 0)
+    	{
+    		console.log(`E-mail 0 de ${data.length}`);
+    		for(let i = 0; i < data.length; i++)
+    		{
+    			procesados.push({
+                                    idvideo : data[i].idvideo, 
+                                    terminado : false
+                                });
+    			enviarEmail(data[i], (err, video) => 
+    			{
+    				actualizaEstadoEnvio(video, (err, video) => 
+    				{
+    					terminaDeProcesarEmail(video.idvideo);
+    				});				
+    			});
+    		}
+    	}	
+    	else
+    	{
+    		db.closeConection();
+    	}
+    });
 };
 
 //Para cambiar el estado a terminado...
@@ -129,7 +130,7 @@ let enviarEmail = (datosEmail, callback) =>
                                 <td>
                                     <p>
                                         <center>
-                                            <img border='0' src='https://dl.dropboxusercontent.com/u/181689/smarttools.jpg?a=1'>
+                                            <img border='0' src='https://dl.dropboxusercontent.com/u/181689/smarttools.jpg?a=2'>
                                         </center>
                                     </p>
                                 </td>
@@ -167,22 +168,21 @@ let enviarEmail = (datosEmail, callback) =>
                             </tr>
                         </table></font></center></body></html>`;
 	let mailOptions = {
-							from: '"SmartTools" <convertvideo@smarttools.com>',
-							to: datosEmail.email, 
-							subject: `${datosEmail.titulo_video} ha sido Convertido ✔`, 
-							html: mensaje
-					  };
+                            from: '"SmartTools" <jh.rubiano10@uniandes.edu.co>',
+                            to: datosEmail.email, 
+                            subject: `${datosEmail.titulo_video} ha sido Convertido ✔`, 
+                            html: mensaje
+                      };
 	//Enviar el e-mail...
 	transporter.sendMail(mailOptions, function(error, info)
 	{
     	if(error)
     	{
-        	return console.log(error);
+        	return;
     	}
     	console.log('Message sent: ' + info.response);
     	callback(error, datosEmail);
 	});
 };
-
 //sendEmail();
 module.exports.sendEmail = sendEmail;
