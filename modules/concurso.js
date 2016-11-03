@@ -160,7 +160,7 @@ let crearConcurso = (req, callback) =>
             }
         }
     }    
-    let directorio      = `/home/ec2-user/efs/uploadedfiles/${req.user.idadministrador}`,
+    let directorio      = `../uploadedfiles/${req.user.idadministrador}`,
         banner	        = `${directorio}/banner`, 
         sampleFile      = existeArchivo ? req.files.sampleFile : "", 
         extension       = existeArchivo ? sampleFile.mimetype.split("/") : "",

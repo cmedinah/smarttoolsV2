@@ -13,7 +13,7 @@ let newVideo = (req, callback) =>
     {
         callback(true, "No existe archivos para subir");
     }
-    let directorio      = `/home/ec2-user/efs/uploadedfiles/${data.idadministrador}`,
+    let directorio      = `../uploadedfiles/${data.idadministrador}`,
         folderVideos    = `${directorio}/videos`, 
         extensionValida = ["avi", "wmv", "flv", "mov", "mp4", "webm"], 
         videoUbicacion  = {
