@@ -58,7 +58,7 @@ const express 			= 	require("express"),
 	app.set("view engine", "html");
 	app.set("views", __dirname + "/views");
 	app.use(express.static('public'));
-	app.use("/static", express.static("/home/ec2-user/efs/uploadedfiles"));
+	app.use("/static", express.static("../uploadedfiles"));
 	//Para indicar que se envía y recibe información por medio de Json...
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({extended: true}));
